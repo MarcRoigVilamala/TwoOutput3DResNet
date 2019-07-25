@@ -195,8 +195,14 @@ def generate_model(opt):
                 model.classifier = nn.Linear(
                     model.classifier.in_features, opt.n_finetune_classes)
             else:
-                model.fc = nn.Linear(model.fc.in_features,
-                                            opt.n_finetune_classes)
+                model.fc = nn.Sequential(
+                    [
+                        nn.Linear(model.classifier.in_features, 512),
+                        nn.Linear(512, 256),
+                        nn.Linear(256, 64),
+                        nn.Linear(64, opt.n_finetune_classes)
+                    ]
+                )
 
             parameters = get_fine_tuning_parameters(model, opt.ft_begin_index)
             return model, parameters

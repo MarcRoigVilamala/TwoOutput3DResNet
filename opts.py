@@ -143,7 +143,7 @@ def parse_opts():
         '--pretrain_path', default='', type=str, help='Pretrained model (.pth)')
     parser.add_argument(
         '--ft_begin_index',
-        default=0,
+        default=5,
         type=int,
         help='Begin block index of fine-tuning')
     parser.add_argument(
