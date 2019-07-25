@@ -14,7 +14,7 @@ from spatial_transforms import (
     Compose, Normalize, Scale, CenterCrop, CornerCrop, MultiScaleCornerCrop,
     MultiScaleRandomCrop, RandomHorizontalFlip, ToTensor)
 from temporal_transforms import LoopPadding, TemporalRandomCrop
-from target_transforms import ClassLabel, VideoID
+from target_transforms import ClassLabel, VideoID, TimeStampLabel
 from target_transforms import Compose as TargetCompose
 from dataset import get_training_set, get_validation_set, get_test_set
 from utils import Logger
@@ -72,7 +72,8 @@ if __name__ == '__main__':
             ToTensor(opt.norm_value), norm_method
         ])
         temporal_transform = TemporalRandomCrop(opt.sample_duration)
-        target_transform = ClassLabel()
+        # target_transform = ClassLabel()
+        target_transform = TimeStampLabel('Temporal_Anomaly_Annotation_for_Testing_Videos.txt')
         training_data = get_training_set(opt, spatial_transform,
                                          temporal_transform, target_transform)
         train_loader = torch.utils.data.DataLoader(
@@ -108,7 +109,8 @@ if __name__ == '__main__':
             ToTensor(opt.norm_value), norm_method
         ])
         temporal_transform = LoopPadding(opt.sample_duration)
-        target_transform = ClassLabel()
+        # target_transform = ClassLabel()
+        target_transform = TimeStampLabel('Temporal_Anomaly_Annotation_for_Testing_Videos.txt')
         validation_data = get_validation_set(
             opt, spatial_transform, temporal_transform, target_transform)
         val_loader = torch.utils.data.DataLoader(
