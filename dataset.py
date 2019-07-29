@@ -28,6 +28,7 @@ def get_training_set(opt, spatial_transform, temporal_transform,
             opt.video_path,
             opt.annotation_path,
             'training',
+            n_samples_for_each_video=0,
             spatial_transform=spatial_transform,
             temporal_transform=temporal_transform,
             target_transform=target_transform
