@@ -14,7 +14,7 @@ from spatial_transforms import (
     Compose, Normalize, Scale, CenterCrop, CornerCrop, MultiScaleCornerCrop,
     MultiScaleRandomCrop, RandomHorizontalFlip, ToTensor)
 from temporal_transforms import LoopPadding, TemporalRandomCrop
-from target_transforms import ClassLabel, VideoID, TimeStampLabel
+from target_transforms import ClassLabel, VideoID, TimeStampLabel, VideoIDAndFrames
 from target_transforms import Compose as TargetCompose
 from dataset import get_training_set, get_validation_set, get_test_set
 from utils import Logger
@@ -151,7 +151,8 @@ if __name__ == '__main__':
             ToTensor(opt.norm_value), norm_method
         ])
         temporal_transform = LoopPadding(opt.sample_duration)
-        target_transform = VideoID()
+        # target_transform = VideoID()
+        target_transform = VideoIDAndFrames()
 
         test_data = get_test_set(opt, spatial_transform, temporal_transform,
                                  target_transform)
@@ -161,4 +162,5 @@ if __name__ == '__main__':
             shuffle=False,
             num_workers=opt.n_threads,
             pin_memory=True)
-        test.test(test_loader, model, opt, test_data.class_names)
+        # test.test(test_loader, model, opt, test_data.class_names)
+        test.every_segment_test(test_loader, model, opt, test_data.class_names)

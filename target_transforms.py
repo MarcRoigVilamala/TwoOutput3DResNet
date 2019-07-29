@@ -72,3 +72,8 @@ class VideoID(object):
 
     def __call__(self, target):
         return target['video_id']
+
+
+class VideoIDAndFrames(object):
+    def __call__(self, target):
+        return str(target['video_id']) + str(target['segment'])
