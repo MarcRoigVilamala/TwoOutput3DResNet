@@ -83,21 +83,12 @@ class UCF101(data.Dataset):
         return video_names, annotations
 
     @classmethod
-    def make_dataset(cls, root_path, annotation_path, subset, n_samples_for_each_video,
-                     sample_duration):
-        data = cls.load_annotation_data(annotation_path)
-        video_names, annotations = cls.get_video_names_and_annotations(data, subset)
-        class_to_idx = cls.get_class_labels(data)
-        idx_to_class = {}
-        for name, label in class_to_idx.items():
-            idx_to_class[label] = name
-
-        dataset = []
-        for i in range(len(video_names)):
+    def get_videos(cls, root_path, video_names):
+        for i, video_name in enumerate(video_names):
             if i % 1000 == 0:
                 print('dataset loading [{}/{}]'.format(i, len(video_names)))
 
-            video_path = os.path.join(root_path, video_names[i])
+            video_path = os.path.join(root_path, video_name)
             if not os.path.exists(video_path):
                 print('{} not found!'.format(video_path), file=sys.stderr)
                 continue
@@ -108,36 +99,70 @@ class UCF101(data.Dataset):
                 print('{} does not have frames!'.format(video_path), file=sys.stderr)
                 continue
 
-            begin_t = 1
-            end_t = n_frames
-            sample = {
-                'video': video_path,
-                'segment': [begin_t, end_t],
-                'n_frames': n_frames,
-                'video_id': video_names[i].split('/')[1]
-            }
+            yield i, video_path, video_name, n_frames
+
+    @classmethod
+    def get_samples(cls, video_path, video_name, n_frames, label, n_samples_for_each_video, sample_duration):
+        begin_t = 1
+        end_t = n_frames
+        sample = {
+            'video': video_path,
+            'segment': [begin_t, end_t],
+            'n_frames': n_frames,
+            'video_id': video_name.split('/')[1],
+            'label': label
+        }
+
+
+        if n_samples_for_each_video == 1:
+            sample['frame_indices'] = list(range(1, n_frames + 1))
+            return [sample]
+        else:
+            if n_samples_for_each_video > 1:
+                step = max(1,
+                           math.ceil((n_frames - 1 - sample_duration) /
+                                     (n_samples_for_each_video - 1)))
+            else:
+                step = sample_duration
+
+            res = []
+            for j in range(1, n_frames, step):
+                sample_j = copy.deepcopy(sample)
+                sample_j['frame_indices'] = list(
+                    range(j, min(n_frames + 1, j + sample_duration)))
+                res.append(sample_j)
+
+            return res
+
+    @classmethod
+    def sub_make_dataset(cls, root_path, video_names, annotations, class_to_idx,
+                         n_samples_for_each_video, sample_duration):
+        dataset = []
+        for i, video_path, video_name, n_frames in cls.get_videos(root_path, video_names):
             if len(annotations) != 0:
-                sample['label'] = class_to_idx[annotations[i]['label']]
+                label = class_to_idx[annotations[i]['label']]
             else:
-                sample['label'] = -1
+                label = -1
 
-            if n_samples_for_each_video == 1:
-                sample['frame_indices'] = list(range(1, n_frames + 1))
-                dataset.append(sample)
-            else:
-                if n_samples_for_each_video > 1:
-                    step = max(1,
-                               math.ceil((n_frames - 1 - sample_duration) /
-                                         (n_samples_for_each_video - 1)))
-                else:
-                    step = sample_duration
-                for j in range(1, n_frames, step):
-                    sample_j = copy.deepcopy(sample)
-                    sample_j['frame_indices'] = list(
-                        range(j, min(n_frames + 1, j + sample_duration)))
-                    dataset.append(sample_j)
+            dataset += cls.get_samples(
+                video_path, video_name, n_frames, label, n_samples_for_each_video, sample_duration
+            )
 
-        return dataset, idx_to_class
+        return dataset
+
+    @classmethod
+    def make_dataset(cls, root_path, annotation_path, subset, n_samples_for_each_video,
+                     sample_duration):
+        data = cls.load_annotation_data(annotation_path)
+        video_names, annotations = cls.get_video_names_and_annotations(data, subset)
+        class_to_idx = cls.get_class_labels(data)
+        idx_to_class = {}
+        for name, label in class_to_idx.items():
+            idx_to_class[label] = name
+
+        return cls.sub_make_dataset(
+            root_path, video_names, annotations, class_to_idx, n_samples_for_each_video, sample_duration
+        ), idx_to_class
 
     """
     Args:
