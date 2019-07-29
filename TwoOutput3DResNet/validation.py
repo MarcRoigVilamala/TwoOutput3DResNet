@@ -1,9 +1,8 @@
 import torch
 from torch.autograd import Variable
 import time
-import sys
 
-from utils import AverageMeter, calculate_accuracy
+from TwoOutput3DResNet.utils import AverageMeter, calculate_accuracy
 
 
 def val_epoch(epoch, data_loader, model, criterion, opt, logger):

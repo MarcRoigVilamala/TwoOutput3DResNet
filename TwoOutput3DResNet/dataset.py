@@ -1,8 +1,8 @@
-from datasets.kinetics import Kinetics
-from datasets.activitynet import ActivityNet
-from datasets.ucf101 import UCF101
-from datasets.hmdb51 import HMDB51
-from datasets.ucfcrime import UCFCRIME
+from TwoOutput3DResNet.datasets.kinetics import Kinetics
+from TwoOutput3DResNet.datasets.activitynet import ActivityNet
+from TwoOutput3DResNet.datasets.ucf101 import UCF101
+from TwoOutput3DResNet.datasets.hmdb51 import HMDB51
+from TwoOutput3DResNet.datasets.ucfcrime import UCFCRIME
 
 
 DATASET_CLASS = {

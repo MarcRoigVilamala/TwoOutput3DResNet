@@ -1,26 +1,23 @@
 import os
-import sys
 import json
-import numpy as np
 import torch
 from torch import nn
 from torch import optim
 from torch.optim import lr_scheduler
 
-from opts import parse_opts
-from model import generate_model
-from mean import get_mean, get_std
-from spatial_transforms import (
+from TwoOutput3DResNet.opts import parse_opts
+from TwoOutput3DResNet.model import generate_model
+from TwoOutput3DResNet.mean import get_mean, get_std
+from TwoOutput3DResNet.Transformations.spatial_transforms import (
     Compose, Normalize, Scale, CenterCrop, CornerCrop, MultiScaleCornerCrop,
     MultiScaleRandomCrop, RandomHorizontalFlip, ToTensor)
-from temporal_transforms import LoopPadding, TemporalRandomCrop
-from target_transforms import ClassLabel, VideoID, TimeStampLabel, VideoIDAndFrames
-from target_transforms import Compose as TargetCompose
-from dataset import get_training_set, get_validation_set, get_test_set
-from utils import Logger
-from train import train_epoch
-from validation import val_epoch
-import test
+from TwoOutput3DResNet.Transformations.temporal_transforms import LoopPadding, TemporalRandomCrop
+from TwoOutput3DResNet.Transformations.target_transforms import TimeStampLabel, VideoIDAndFrames
+from TwoOutput3DResNet.dataset import get_training_set, get_validation_set, get_test_set
+from TwoOutput3DResNet.utils import Logger
+from TwoOutput3DResNet.train import train_epoch
+from TwoOutput3DResNet.validation import val_epoch
+from TwoOutput3DResNet import test
 
 if __name__ == '__main__':
     opt = parse_opts()

@@ -9,7 +9,7 @@ import functools
 import json
 import copy
 
-from utils import load_value_file
+from TwoOutput3DResNet.utils import load_value_file
 
 
 class UCF101(data.Dataset):

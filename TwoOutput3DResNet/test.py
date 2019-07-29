@@ -3,10 +3,9 @@ from torch.autograd import Variable
 import torch.nn.functional as F
 import time
 import os
-import sys
 import json
 
-from utils import AverageMeter
+from TwoOutput3DResNet.utils import AverageMeter
 
 
 def calculate_video_results(output_buffer, video_id, test_results, class_names):

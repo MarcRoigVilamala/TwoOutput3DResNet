@@ -1,5 +1,5 @@
 import re
-from datasets.ucf101 import *
+from TwoOutput3DResNet.datasets.ucf101 import *
 
 
 class UCFCRIME(UCF101):
