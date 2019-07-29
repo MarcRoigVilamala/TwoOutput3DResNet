@@ -110,3 +110,36 @@ class TemporalRandomCrop(object):
             out.append(index)
 
         return out
+
+
+class TemporalIndexCrop(object):
+    """Temporally crop the given frame indices at the indicated location.
+
+    If the number of frames is less than the size,
+    loop the indices as many times as necessary to satisfy the size.
+
+    Args:
+        size (int): Desired output size of the crop.
+    """
+    def __init__(self, size, index):
+        self.size = size
+        self.index = index
+
+    def __call__(self, frame_indices):
+        """
+        Args:
+            frame_indices (list): frame indices to be cropped.
+        Returns:
+            list: Cropped frame indices.
+        """
+
+        end_index = min(self.index + self.size, len(frame_indices))
+
+        out = frame_indices[self.index:end_index]
+
+        for index in out:
+            if len(out) >= self.size:
+                break
+            out.append(index)
+
+        return out
