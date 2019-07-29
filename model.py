@@ -172,14 +172,19 @@ def generate_model(opt):
 
             model.load_state_dict(pretrain['state_dict'])
 
-            if opt.model == 'densenet':
-                model.module.classifier = nn.Linear(
-                    model.module.classifier.in_features, opt.n_finetune_classes)
-                model.module.classifier = model.module.classifier.cuda()
-            else:
-                model.module.fc = nn.Linear(model.module.fc.in_features,
-                                            opt.n_finetune_classes)
-                model.module.fc = model.module.fc.cuda()
+            if opt.n_classes != opt.n_finetune_classes:
+                if opt.model == 'densenet':
+                    model.module.classifier = nn.Linear(
+                        model.module.classifier.in_features, opt.n_finetune_classes)
+                    model.module.classifier = model.module.classifier.cuda()
+                else:
+                    model.module.fc = nn.Sequential(
+                        nn.Linear(model.module.fc.in_features, 512),
+                        nn.Linear(512, 256),
+                        nn.Linear(256, 64),
+                        nn.Linear(64, opt.n_finetune_classes)
+                    )
+                    model.module.fc = model.module.fc.cuda()
 
             parameters = get_fine_tuning_parameters(model, opt.ft_begin_index)
             return model, parameters
@@ -191,18 +196,17 @@ def generate_model(opt):
 
             model.load_state_dict(pretrain['state_dict'])
 
-            if opt.model == 'densenet':
-                model.classifier = nn.Linear(
-                    model.classifier.in_features, opt.n_finetune_classes)
-            else:
-                model.fc = nn.Sequential(
-                    [
+            if opt.n_classes != opt.n_finetune_classes:
+                if opt.model == 'densenet':
+                    model.classifier = nn.Linear(
+                        model.classifier.in_features, opt.n_finetune_classes)
+                else:
+                    model.fc = nn.Sequential(
                         nn.Linear(model.classifier.in_features, 512),
                         nn.Linear(512, 256),
                         nn.Linear(256, 64),
                         nn.Linear(64, opt.n_finetune_classes)
-                    ]
-                )
+                    )
 
             parameters = get_fine_tuning_parameters(model, opt.ft_begin_index)
             return model, parameters
