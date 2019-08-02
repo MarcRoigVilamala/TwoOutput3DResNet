@@ -223,6 +223,8 @@ class UCF101(data.Dataset):
 
         if self.target_transform is not None:
             target = self.target_transform(video_data)
+        else:
+            target = 0
 
         return clip, target
 

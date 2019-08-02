@@ -5,10 +5,58 @@ import collections
 import numpy as np
 import torch
 from PIL import Image, ImageOps
+
+from TwoOutput3DResNet.mean import get_mean, get_std
+
 try:
     import accimage
 except ImportError:
     accimage = None
+
+
+def get_norm_method(opt):
+    opt.mean = get_mean(opt.norm_value, dataset=opt.mean_dataset)
+    opt.std = get_std(opt.norm_value)
+
+    if opt.no_mean_norm and not opt.std_norm:
+        return Normalize([0, 0, 0], [1, 1, 1])
+    elif not opt.std_norm:
+        return Normalize(opt.mean, [1, 1, 1])
+    else:
+        return Normalize(opt.mean, opt.std)
+
+
+def get_spatial_transform(opt, norm_method, subset='train'):
+    opt.scales = [opt.initial_scale]
+    for i in range(1, opt.n_scales):
+        opt.scales.append(opt.scales[-1] * opt.scale_step)
+
+    if subset == 'train':
+        assert opt.train_crop in ['random', 'corner', 'center']
+        if opt.train_crop == 'random':
+            crop_method = MultiScaleRandomCrop(opt.scales, opt.sample_size)
+        elif opt.train_crop == 'corner':
+            crop_method = MultiScaleCornerCrop(opt.scales, opt.sample_size)
+        elif opt.train_crop == 'center':
+            crop_method = MultiScaleCornerCrop(
+                opt.scales, opt.sample_size, crop_positions=['c'])
+        return Compose([
+            crop_method,
+            RandomHorizontalFlip(),
+            ToTensor(opt.norm_value), norm_method
+        ])
+    elif subset == 'val':
+        return Compose([
+            Scale(opt.sample_size),
+            CenterCrop(opt.sample_size),
+            ToTensor(opt.norm_value), norm_method
+        ])
+    elif subset == 'test':
+        return Compose([
+            Scale(int(opt.sample_size / opt.scale_in_test)),
+            CornerCrop(opt.sample_size, opt.crop_position_in_test),
+            ToTensor(opt.norm_value), norm_method
+        ])
 
 
 class Compose(object):
