@@ -148,6 +148,8 @@ class ResNet(nn.Module):
                 nn.Linear(64, num_classes)
             )
 
+        self.softmax = nn.Softmax(1)
+
         for m in self.modules():
             if isinstance(m, nn.Conv3d):
                 m.weight = nn.init.kaiming_normal(m.weight, mode='fan_out')
@@ -195,6 +197,8 @@ class ResNet(nn.Module):
 
         x = x.view(x.size(0), -1)
         x = self.fc(x)
+
+        x = self.softmax(x)
 
         return x
 
